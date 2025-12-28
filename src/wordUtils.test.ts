@@ -1,34 +1,24 @@
-// 関数を作成
 import { describe, it, expect } from 'vitest';
 import { processWordList } from './wordUtils';
 
-// 重複削除 ＆ ソート
-describe('リスト加工(重複削除 & ソート)', () => {
-  // テストデータ(重複あり、バラバラ）
-  const input = ["みかん", "パイナップル", "みかん", "apple", "柿", "パイナップル"];
-  // 重複を削除して短い順に並べ替えられるか
-  it('重複を削除して短い順に並べ替えられるか', () => {
+describe('リスト加工(ソートのみ)', () => {
+  // 重複を含む入力データ
+  const input = ["みかん", "apple", "パイナップル", "みかん", "パイナップル", "柿"];
+
+  it('重複を残したまま短い順に並べ替えられるか', () => {
     const result = processWordList(input, 'length-asc');
-    expect(result).toEqual(["柿", "みかん", "apple", "パイナップル"]);
+    // 期待値: 重複はそのまま、文字数順になる
+    expect(result).toEqual(["柿", "みかん", "みかん", "apple", "パイナップル", "パイナップル"]);
   });
 
-  //重複を削除して長い順に並べ替えられるか
-  it('重複を削除して長い順に並べ替えられるか', () => {
+  it('重複を残したまま長い順に並べ替えられるか', () => {
     const result = processWordList(input, 'length-desc');
-    expect(result).toEqual(["パイナップル", "apple", "みかん", "柿"]);
+    expect(result).toEqual(["パイナップル", "パイナップル", "apple", "みかん", "みかん", "柿"]);
   });
 
-  //重複を削除してあいうえお順に並べ替えられるか
-  it('重複を削除してあいうえお順に並べ替えられるか', () => {
+  it('重複を残したままあいうえお順に並べ替えられるか', () => {
     const result = processWordList(input, 'dict');
-    expect(result).toEqual(["apple", "パイナップル", "みかん", "柿"]);
-  });
-
-  //重複のみ削除するか
-  it('重複のみ削除するか', () => {
-    // どんな並び替えモードでもいいので実行
-    const result = processWordList(input, 'length-asc');
-    // 重複が削除されて4個になってるはず
-    expect(result.length).toBe(4);
+    // 辞書順 (英語 -> 日本語)
+    expect(result).toEqual(["apple", "パイナップル", "パイナップル", "みかん", "みかん", "柿"]);
   });
 });

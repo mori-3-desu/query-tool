@@ -224,6 +224,7 @@ function App() {
   };
 
   // --- 抽出・置換・範囲・重複・クリア処理
+  // --- 抽出・置換・範囲・重複・クリア処理
   const handleProcess = () => {
     setHistory(prev => [...prev, text]);
     let resultText = '';
@@ -231,6 +232,7 @@ function App() {
     let logLines: string[] = [];
 
     if (mode === 'replace') {
+      // ... (置換モードの処理は変更なし) ...
       if (!replaceTarget) return;
       try {
         const pattern = useRegex ? replaceTarget : replaceTarget.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -255,16 +257,28 @@ function App() {
       }
     } else {
       if (mode === 'range') {
+        // 範囲モードは引数で渡しているのでOK
         resultText = rangeSort(text, sortType, filterKeyword, removeDuplicate, formatString, autoComma);
         setStatusMessage('⚡ 範囲変換完了');
       } else {
+        // ★ここを修正しました！
         let list = originalLines;
+        
+        // 1. フィルタリング
         list = filterList(list, filterKeyword, isExcludeMode);
+
+        // 2. 重複削除のチェックボックスを確認して処理
+        if (removeDuplicate) {
+          list = Array.from(new Set(list));
+        }
+
+        // 3. 最後にソート (wordUtilsはソートだけするようになった)
         const resultArr = processWordList(list, sortType);
         resultText = resultArr.join('\n');
         setStatusMessage('⚡ 抽出/削除完了');
       }
 
+      // ... (ログ生成処理は変更なし) ...
       const normalize = (s: string) => s.trim().replace(/,$/, '');
       const resultCount = new Map<string, number>();
       resultText.split('\n').forEach(line => {

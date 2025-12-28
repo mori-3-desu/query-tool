@@ -1,9 +1,23 @@
-import { sortList, type SortType } from "./sort";
+import { type SortType } from './sort';
 
-export const processWordList = (array: string[], type: SortType) => {
-    // 重複を削除する(Setを使う)
-    const uniqueList = [...new Set(array)];
+export function processWordList(lines: string[], sortType: SortType): string[] {
+  // ここでの重複削除(Set)はやめて、そのままソートだけ行うように変更
+  const list = [...lines];
 
-    // きれいになったリストを並び替えて返す
-    return sortList(uniqueList, type);
-};
+  return list.sort((a, b) => {
+    switch (sortType) {
+      case 'length-desc':
+        return b.length - a.length || a.localeCompare(b);
+      case 'length-asc':
+        return a.length - b.length || a.localeCompare(b);
+      case 'dict':
+        return a.localeCompare(b);
+      case 'numeric-desc':
+        return (parseFloat(b) || 0) - (parseFloat(a) || 0);
+      case 'numeric-asc':
+        return (parseFloat(a) || 0) - (parseFloat(b) || 0);
+      default:
+        return 0;
+    }
+  });
+}

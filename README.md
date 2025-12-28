@@ -1,73 +1,82 @@
-# React + TypeScript + Vite
+# 🗃️ Query Tool
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 使用技術一覧
+- **フロントエンド** : TypeScript, React, Vite, Node.js
+- **スタイリング** : Tailwind CSS
+- **テスト** : Vitest
+- **デプロイ** : Vercel
 
-Currently, two official plugins are available:
+## 概要
+- タイピングゲーム開発において、単語データの「重複」や「表記ゆれ」による修正コストを削減するために作成した、テキストデータ整形・管理ツールです。
+- また、モダンなフロントエンド技術スタック（File System Access APIなど）の学習も目的としています。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 画面全体
+![画面全体](../images/whole.jpeg)
 
-## React Compiler
+## 💫 特徴
+- **File System Access API**を使用しており完全クライアントサイドで動作するため、データを外部に送信することなくセキュアに利用可能です!
+- **SQL**のような感覚で、大量のテキストデータから必要な行だけを抽出・操作できます！
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 機能説明
 
-## Expanding the ESLint configuration
+### 📁 FILE CONTROL
+- **ファイルを開く** : PC内のテキストファイルを読み込みます。
+- **上書き保存** : 開いているファイルをそのまま上書き保存します。
+- **別名保存** : 編集した内容を新しいファイルとして保存します。
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### ⚙️ MODE SELECT
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+#### 1. 抽出/削除
+特定のキーワードを含む行だけを抜き出したり、逆に削除したりします。
+- (例) "error" と入力 → ログからエラー行だけを抽出
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+**[🔍 検索ヒント]**
+- `*りんご*`: **部分一致** (これを含む行)
+    - 対象: りんご, あおりんご, りんご飴
+- `りんご*`: **前方一致** (これで始まる行)
+    - 対象: りんご, りんご飴
+- `*りんご`: **後方一致** (これで終わる行)
+    - 対象: りんご, あおりんご
+- `りんご`: **完全一致** (値と完全に一致する行のみ)
+    - 対象: りんご
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+#### 2. 置換
+文字列を別の文字に置き換えます。正規表現（Regex）も使用可能です。
+- (例) "foo" を "bar" に一括置換
+- `console.log` 削除などのプリセット機能あり
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+#### 3. 範囲対象 (高度なソート)
+データの構造（JSON等）を崩さずに、中身の値だけで並び替えます。
+**★重要**: 対象外の行（const やコメント等）の位置はそのままで、「指定したフォーマットに合う行だけ」が並び替わります。
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+> **※フォーマット指定例**
+> `{ id: !, name: ? }` と指定した場合：
+> - `!` を基準にして `{}` が含まれている行のみがソートされます。
+> - `?` の場所は、`!` のソート結果に合わせて一緒に移動します。
+> - それ以外の行（const定義など）は位置が維持されます。
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Tips
+- **Undo**: 1つ前の状態に戻せます。
+- **Copy**: テキストエリアのデータをクリップボードにコピーします。
+- **Clear**: テキストエリアのデータを削除します。
+- **リサイズ**: サイドバーやログエリアの境界線をドラッグすると幅・高さを変更できます。
+- **使い方**: 右上の「❓」ボタンでいつでもマニュアルを確認できます。
+
+## お問い合わせ / Source Code
+ツールをよりよくしていきたいため、バグ報告や機能要望などございましたら GitHubの "Issues" までお気軽にご連絡ください！
+👉 [GitHub Repository](https://github.com/mori-3-desu/query-tool)
+
+## 🚀 ローカルでの実行方法
+
+```bash
+# リポジトリのクローン
+git clone [https://github.com/mori-3-desu/query-tool.git](https://github.com/mori-3-desu/query-tool.git)
+
+# ディレクトリへ移動
+cd query-tool
+
+# 依存関係のインストール
+npm install
+
+# 開発サーバーの起動
+npm run dev
