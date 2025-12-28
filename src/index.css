@@ -1,0 +1,4 @@
+@import "tailwindcss";
+
+/* v4でのダークモード（クラス切り替え）の有効化 */
+@variant dark (&:where(.dark, .dark *));
