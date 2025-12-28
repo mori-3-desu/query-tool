@@ -45,12 +45,16 @@ const WELCOME_TEXT = `/* Query Tool v0.0 Ultimate
       ];
       
       ※フォーマットに { id: !, name: ? } と指定すると、
-      {}が含まれている行のみがソートされ、const等の行の位置はそのまま維持されます。
+      !を基準にして(上の例だと100,2,5の列が基準対象){}が含まれている行のみがソートされ、const等の行の位置はそのまま維持されます。
 
    【Tips】
    - サイドバーの境界線をドラッグすると幅を変えられます ↔️
    - 下のログエリアの境界線をドラッグすると高さを変えられます ↕️
    - 右上の「❓ 使い方」ボタンでいつでもこの画面に戻れます。
+   お問い合わせ / Source Code】
+   ツールをよりよくしていきたいため、バグ報告や機能要望などございましたら
+   GitHubの "Issues" までお気軽にご連絡ください！
+   👉 https://github.com/mori-3-desu/query-tool
 */
 
 const DATA = [
@@ -64,20 +68,20 @@ function App() {
   const [text, setText] = useState<string>(WELCOME_TEXT);
   const [history, setHistory] = useState<string[]>([]);
 
-  // 設定
+  // ダークモード設定
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('theme');
     return saved ? saved === 'dark' : true;
   });
 
-  const [sortType, setSortType] = useState<SortType>('length-desc');
-  const [removeDuplicate, setRemoveDuplicate] = useState(true);
-  const [mode, setMode] = useState<'extract' | 'replace' | 'range'>('extract');
+  const [sortType, setSortType] = useState<SortType>('length-desc'); //ソート設定 (文字数順/辞書順など)
+  const [removeDuplicate, setRemoveDuplicate] = useState(true); //重複削除設定
+  const [mode, setMode] = useState<'extract' | 'replace' | 'range'>('extract'); //抽出・置換・範囲検索モード
 
-  const [filterKeyword, setFilterKeyword] = useState('');
-  const [formatString, setFormatString] = useState('{ jp: "!", roma: "?" }');
-  const [autoComma, setAutoComma] = useState(true);
-  const [isExcludeMode, setIsExcludeMode] = useState(false);
+  const [filterKeyword, setFilterKeyword] = useState(''); //特定の要素を取り出す設定 絞り込み/検索キーワード
+  const [formatString, setFormatString] = useState('{ jp: "!", roma: "?" }'); //範囲検索のフォーマット指定
+  const [autoComma, setAutoComma] = useState(true); //末尾への自動カンマ付与設定
+  const [isExcludeMode, setIsExcludeMode] = useState(false); //除外(行削除)モードのON/OFF
 
   // 置換用
   const [replaceTarget, setReplaceTarget] = useState('');
@@ -97,6 +101,7 @@ function App() {
   const [sidebarWidth, setSidebarWidth] = useState(384); // 初期幅 (w-96相当)
   const [isResizingSidebar, setIsResizingSidebar] = useState(false);
 
+  // --- ライトモードダークモード ---
   useEffect(() => {
     const root = window.document.documentElement;
     if (isDarkMode) {
@@ -173,6 +178,7 @@ function App() {
     } catch (err) { }
   };
 
+  // --- 上書き保存 ---
   const handleOverwriteSave = async () => {
     if (!text || !fileHandle) return;
     if (!confirm(`【確認】"${fileHandle.name}" を上書き保存しますか？`)) return;
@@ -181,9 +187,10 @@ function App() {
       await writable.write(text);
       await writable.close();
       setStatusMessage('✅ 保存完了！');
-    } catch (err) { alert('保存に失敗しました'); }
+    } catch (err) { alert('❌ 保存に失敗しました'); }
   };
 
+  // --- 別名保存 ---
   const handleExportSave = () => {
     if (!text) return;
     const blob = new Blob([text], { type: 'text/plain' });
@@ -199,6 +206,7 @@ function App() {
     setStatusMessage('📥 別名保存完了');
   };
 
+  // --- 1個前に戻る ---
   const handleUndo = () => {
     if (history.length === 0) return;
     setText(history[history.length - 1]);
@@ -207,6 +215,7 @@ function App() {
     setStatusMessage('↩️ Undoしました');
   };
 
+  // --- デバッグ等取り除き用(使用場所限られるかも) ---
   const setConsoleLogPreset = () => {
     setReplaceTarget('console\\.log\\s*\\(.*?\\);?');
     setReplaceValue('');
@@ -214,6 +223,7 @@ function App() {
     setStatusMessage('🔧 console.log削除設定を適用');
   };
 
+  // --- 抽出・置換・範囲・重複・クリア処理
   const handleProcess = () => {
     setHistory(prev => [...prev, text]);
     let resultText = '';
@@ -240,7 +250,7 @@ function App() {
           setDeletedLines([]);
         }
       } catch (e) {
-        alert('正規表現が正しくありません');
+        alert('❌ 正規表現が正しくありません');
         return;
       }
     } else {
@@ -392,8 +402,8 @@ function App() {
                     <span className="text-lg">✨</span>
                     <div>
                       <p className="font-bold text-green-600 dark:text-green-400 mb-1">フォーマット指定</p>
-                      <p><code>!</code> <span className="mx-1 opacity-50">→</span> 1つ目の値 (単語)</p>
-                      <p><code>?</code> <span className="mx-1 opacity-50">→</span> 2つ目の値 (読み/ID)</p>
+                      <p><code>!</code> <span className="mx-1 opacity-50">→</span> ソート基準を指定</p>
+                      <p><code>?</code> <span className="mx-1 opacity-50">→</span> ソート基準によって値が変わる場所</p>
                     </div>
                   </div>
                   <input type="text" value={formatString} onChange={(e) => setFormatString(e.target.value)} className="w-full p-3 text-sm font-mono rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-800 outline-none focus:border-green-500 transition-colors shadow-sm" />
